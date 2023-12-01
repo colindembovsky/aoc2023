@@ -67,7 +67,6 @@ function getLineNum(line: string) {
         firstDigit = textNums.indexOf(firstWord.textNum).toString();
     }
 
-
     let lastDigit = line[lastDigitIndex];
     // if the first digit index is after the first word index, then the first digit is the first word
     if (lastDigitIndex === -1 || lastWord.index > lastDigitIndex) {
