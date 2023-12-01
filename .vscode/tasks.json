@@ -24,9 +24,6 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "dependsOn": [
-                "npm: install"
-            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
