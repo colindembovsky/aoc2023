@@ -4,7 +4,7 @@ import { Bag, Game } from "./game";
 let day = dayName(__dirname);
 let contents = loadInput(__dirname, Difficulty.HARD);
 
-console.log(contents);
+//console.log(contents);
 
 console.log(`==== ${day}: PART 1 ====`);
 let lines = contents.split("\n");
@@ -15,3 +15,7 @@ let workingGames = games.filter(game => game.bags.every(bag => bag.worksForCombo
 
 // log the sum of game ids
 console.log(workingGames.reduce((sum, game) => sum + game.gameNumber, 0));
+
+console.log(`==== ${day}: PART 2 ====`);
+// calculate the sum of the power for all games
+console.log(games.reduce((sum, game) => sum + game.minCubesPower(), 0));

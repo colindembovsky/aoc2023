@@ -1,7 +1,7 @@
 export class Bag {
-    private red = 0;
-    private green = 0;
-    private blue = 0;
+    public red = 0;
+    public green = 0;
+    public blue = 0;
 
     constructor(contents: string) {
         // parse "3 blue" to 3
@@ -50,5 +50,19 @@ export class Game {
         for (let bag of bagList) {
             this.bags.push(new Bag(bag));
         }
+    }
+
+    minCubesPower(): number {
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+
+        for (let bag of this.bags) {
+            red = Math.max(red, bag.red);
+            green = Math.max(green, bag.green);
+            blue = Math.max(blue, bag.blue);
+        }
+
+        return red * green * blue;
     }
 }
