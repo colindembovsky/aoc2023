@@ -23,47 +23,37 @@ for(let i = 0; i < lines.length; i++) {
     let line = lines[i];
     
     for(let num of lineNums) {
-        let isPart = false;
         let startIndex = line.indexOf(num);
-        let endIndex = startIndex + num.length - 1;
-
-        // check if the preceding char is a symbol
-        if (startIndex > 0 && line[startIndex-1] !== ".") {
-            isPart = true;
+        let lhs = 1;
+        if (startIndex === 0) {
+            lhs = 0;
         }
-        // check if the following char is a .
-        if (endIndex < line.length-1 && line[endIndex+1] !== ".") {
-            isPart = true;
+        let rhs = 1;
+        if (startIndex + num.length === line.length - 1) {
+            rhs = 0;
         }
 
-        // check if the preceding line has . from 1 less than the same index to 1 more than the last index
-        if (i > 0) {
-            let prevLine = lines[i-1];
-            for(let j = Math.max(0, startIndex-1); j <= Math.min(endIndex+1, line.length-1); j++) {
-                if (prevLine[j] !== ".") {
-                    isPart = true;
-                    break;
-                }
-            }
-        }
+        let dotLine = ".".repeat(num.length + lhs + rhs);
+        let start = startIndex - lhs;
+        let end = startIndex + num.length + rhs;
 
-        // check if the next line has . from 1 less than the same index to 1 more than the last index
-        if (!isPart && i < lines.length - 1) {
-            let nextLine = lines[i+1];
-            for(let j = Math.max(0, startIndex-1); j <= Math.min(endIndex+1, line.length-1); j++) {
-                if (nextLine[j] !== ".") {
-                    isPart = true;
-                    break;
-                }
-            }
-        }
-        if (isPart) {
+        let lineUp = i === 0 ? dotLine : lines[i - 1].substring(start, end);
+        let lineIn = line.substring(start, end).replace(num, ".".repeat(num.length));
+        let lineDown = i === lines.length - 1 ? dotLine : lines[i + 1].substring(start, end);
+
+        if (lineUp !== dotLine || lineIn !== dotLine || lineDown !== dotLine) {
             partNums.push(num);
         }
     }
 }
 
-partNums.forEach(num => console.log(num));
+//partNums.forEach(num => console.log(num));
+// get an array of unique numbers using a set
+//let uniqueNums = Array.from(new Set(partNums));
+
 console.log(partNums.reduce((a, b) => a + parseInt(b), 0));
 // not 330727 (unique numbers)
 // not 535294 (duplicate numbers - but 579 appears once as a part, once as _not_ a part, 988 appears twice etc.)
+// not 539102
+// not 538006
+// not 332375
