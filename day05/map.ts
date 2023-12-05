@@ -15,7 +15,23 @@ seed-to-soil map:
 minTargetRange
 0-49 -> 0-49
 98-99 -> 50-51
+52->
 
+*/
+
+/*
+
+soil-to-fertilizer map:
+0 15 37
+37 52 2
+39 0 15
+
+minTargetRange
+
+15-51 -> 0-36
+52-53 -> 37-38
+0-14 -> 39-53
+54->
 */
 
 export class Range {
