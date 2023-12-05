@@ -1,3 +1,23 @@
+interface MinRange {
+    minSourceStart: number;
+    maxSourceEnd: number;
+    minTargetStart: number;
+    maxTargetEnd: number;
+}
+
+
+/*
+
+seed-to-soil map:
+50 98 2
+52 50 48
+
+minTargetRange
+0-49 -> 0-49
+98-99 -> 50-51
+
+*/
+
 export class Range {
     min: number = 0;
     max: number = 0;
@@ -16,6 +36,15 @@ export class Range {
 
     getMapValue(value: number): number {
         return value + this.offset;
+    }
+
+    get minRange(): MinRange {
+        return {
+            minSourceStart: this.min,
+            maxSourceEnd: this.max,
+            minTargetStart: this.min + this.offset,
+            maxTargetEnd: this.max + this.offset
+        };
     }
 }
 
@@ -43,9 +72,15 @@ export class Map {
     }
 }
 
+export interface SeedRange {
+    Start: number;
+    Length: number;
+}
+
 export class Almanac {
     seeds: number[] = [];
     maps: Map[] = [];
+    seedRanges: SeedRange[] = [];
 
     constructor(contents: string) {
         // split the lines by empty lines
@@ -55,16 +90,23 @@ export class Almanac {
 
         // parse the rest of the lines into maps
         this.maps = lines.map(x => new Map(x));
+
+        // parse pairs of seeds into ranges
+        for (let i = 0; i < this.seeds.length; i += 2) {
+            this.seedRanges.push({ Start: this.seeds[i], Length: this.seeds[i + 1]});
+        }
     }
 
-    getLocationForSeed(seed: number): number {
-        let cur = seed;
-        let map = this.maps.find(x => x.source === "seed")!;
-        do {
-            cur = map.getTargetValue(cur);
+    mapNum(start: number, sourceType = "seed", targetType = "location"): number {
+        let map = this.maps.find(x => x.source === sourceType)!;
+        let cur = map.getTargetValue(start);
+        while(true) {
+            if (map.target === targetType) {
+                break;
+            }
             map = this.maps.find(x => x.source === map.target)!;
-        } while (map.target !== "location");
-        // one more
-        return map.getTargetValue(cur);
+            cur = map.getTargetValue(cur);
+        }
+        return cur;
     }
 }
