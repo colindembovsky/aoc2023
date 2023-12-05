@@ -1,6 +1,6 @@
 export class Card {
     static originalCards: Card[] = [];
-    static matchMap: Map<number, number> = new Map<number, number>();
+    static matchValue: Map<number, number> = new Map<number, number>();
 
     id: number = 0;
     nums: number[] = [];
@@ -22,13 +22,20 @@ export class Card {
         }
     }
 
-    calculateRecursiveWinners() {
-        if ((this.matches === 0)) return;
-
-        for (let i = this.id; i < Math.min(this.id + this.matches, Card.originalCards.length - 1); i++) {
-            let wCard = Card.originalCards[i];
-            Card.matchMap.set(wCard.id, Card.matchMap.get(wCard.id)! + 1);
-            wCard.calculateRecursiveWinners();
+    calculateCopies(): number {
+        if ((this.matches === 0)) {
+            Card.matchValue.set(this.id, 0);
         }
+
+        if (!Card.matchValue.has(this.id)) {
+            let copies = 0;
+            for (let i = this.id; i < Math.min(this.id + this.matches, Card.originalCards.length - 1); i++) {
+                let wCard = Card.originalCards[i];
+                copies += wCard.calculateCopies();
+            }
+            Card.matchValue.set(this.id, copies + this.matches);
+        }
+
+        return Card.matchValue.get(this.id)!;
     }
 }
