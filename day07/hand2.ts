@@ -2,7 +2,7 @@ function getCardVal(card: string): number {
     const val = card[0];
     switch (val) {
         case 'T': return 10;
-        case 'J': return 11;
+        case 'J': return 1;
         case 'Q': return 12;
         case 'K': return 13;
         case 'A': return 14;
@@ -20,13 +20,13 @@ enum HandType {
     FiveOfAKind,
 }
 
-export class Hand {
+export class Hand2 {
     private charCounts: Map<string, number> = new Map<string, number>();
     cards: string = "";
     bid: number = 0;
     HandType: HandType = HandType.HighCard;
 
-    constructor(line: string) {
+    constructor(private line: string) {
         let [c, b] = line.split(" ");
         this.cards = c;
         this.bid = parseInt(b);
@@ -40,6 +40,14 @@ export class Hand {
     }
 
     calcHandType(): HandType {
+        // if there are no Js, then return noJokerType
+        if (!this.charCounts.has('J')) {
+            return this.noJokerType();
+        }
+        return this.jokerType();
+    }
+
+    noJokerType(): HandType {
         let counts = Array.from(this.charCounts.values());
         counts.sort((a, b) => b - a);
         switch (counts[0]) {
@@ -51,14 +59,28 @@ export class Hand {
         }
     }
 
-    compare(other: Hand): number {
+    jokerType(): HandType {
+        // make a new map of charCounts without the J
+        let noJokerCounts = new Map(this.charCounts);
+        noJokerCounts.delete('J');
+        // find the highest char
+        let highestChar = Array.from(noJokerCounts.keys()).reduce((acc, c) => {
+            return getCardVal(acc) > getCardVal(c) ? acc : c;
+        });
+        
+        // make all the Js into the highestChar
+        let jokerHand = new Hand2(this.line.replace(/J/g, highestChar));
+        return jokerHand.HandType;
+    }
+
+    compare(other: Hand2): number {
         if (this.HandType !== other.HandType) {
             return this.HandType - other.HandType;
         }
         return this.compareHighCard(other);
     }
 
-    private compareHighCard(other: Hand): number {
+    private compareHighCard(other: Hand2): number {
         let i = 0;
         for(; i < this.cards.length; i++) {
             let thisVal = getCardVal(this.cards[i]);
