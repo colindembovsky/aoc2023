@@ -22,7 +22,13 @@ function calcWins(times: number[], distances: number[]) {
 }
 
 console.log(`==== day6: PART 1 ====`);
+console.log("test input");
 calcWins([7, 15,  30], [9, 40, 200]);
+console.log("real input");
+calcWins([ 55, 99, 97, 93], [401, 1485, 2274, 1405]);
 
 console.log(`==== day6: PART 2 ====`);
-calcWins([ 55, 99, 97, 93], [401, 1485, 2274, 1405]);
+console.log("test input");
+calcWins([71530], [940200]);
+console.log("real input");
+calcWins([55999793], [401148522741405]);
