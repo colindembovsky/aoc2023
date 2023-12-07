@@ -63,11 +63,19 @@ export class Hand2 {
         // make a new map of charCounts without the J
         let noJokerCounts = new Map(this.charCounts);
         noJokerCounts.delete('J');
-        // find the highest char
-        let highestChar = Array.from(noJokerCounts.keys()).reduce((acc, c) => {
-            return getCardVal(acc) > getCardVal(c) ? acc : c;
+        if (noJokerCounts.size === 0) { return HandType.FiveOfAKind; }
+        
+        // sort the [key, value] paris by their values desc: if the values are the same, sort by the key
+        let sorted = Array.from(noJokerCounts.entries()).sort((a, b) => {
+            if (a[1] === b[1]) {
+                return getCardVal(b[0]) - getCardVal(a[0]);
+            }
+            return b[1] - a[1];
         });
         
+        // get the highest char
+        let highestChar = sorted[0][0];
+       
         // make all the Js into the highestChar
         let jokerHand = new Hand2(this.line.replace(/J/g, highestChar));
         return jokerHand.HandType;
