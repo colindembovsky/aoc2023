@@ -1,10 +1,9 @@
 export class Part {
     static lines: string[] = [];
     static symbols: string[] = ["@", "*", "/", "+", "&", "%", "=", "$", "#", "-"];
-    isPart: boolean = false;
 
-    constructor(public row: number, public col: number, public num: number) {
-        this.isPart = this.calcIsPart();
+    constructor(public row: number, public col: number, public num: number, public isPart = false) {
+        //this.isPart = this.calcIsPart();
     }
 
     calcIsPart() {
@@ -24,6 +23,23 @@ export class Part {
                     if (x !== "." && !x.match(/\d/)) {
                         console.log(`Not a number: ${x}`);
                     }
+                }
+            }
+        }
+        return false;
+    }
+
+    static touchesSymbol(row: number, col: number) {
+        let rStart = Math.max(0, row - 1);
+        let rEnd = Math.min(row + 1, Part.lines.length - 1);
+        let cStart = Math.max(0, col - 1);
+        let cEnd = Math.min(col + 1, Part.lines[row].length - 1);
+
+        for (let r = rStart; r <= rEnd; r++) {
+            for (let c = cStart; c <= cEnd; c++) {
+                // if the current char is a symbol, break
+                if (Part.symbols.includes(Part.lines[r][c])) {
+                    return true;
                 }
             }
         }
