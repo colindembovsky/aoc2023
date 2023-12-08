@@ -5,35 +5,6 @@ interface MinRange {
     maxTargetEnd: number;
 }
 
-
-/*
-
-seed-to-soil map:
-50 98 2
-52 50 48
-
-minTargetRange
-0-49 -> 0-49
-98-99 -> 50-51
-52->
-
-*/
-
-/*
-
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-minTargetRange
-
-15-51 -> 0-36
-52-53 -> 37-38
-0-14 -> 39-53
-54->
-*/
-
 export class Range {
     min: number = 0;
     max: number = 0;
@@ -64,10 +35,11 @@ export class Range {
     }
 }
 
-export class Map {
+export class TMap {
     source: string = "";
     target: string = "";
     ranges: Range[] = [];
+    static cache = new Map<string, number>();
 
     constructor(line: string) {
         let lines = line.split("\n").filter(x => x.trim() !== "");
@@ -78,12 +50,18 @@ export class Map {
     }
 
     getTargetValue(value: number): number {
+        let cacheKey = `${this.source.substring(0,2)}${this.target.substring(0,2)}-${value}`;
+        if (TMap.cache.has(cacheKey)) {
+            return TMap.cache.get(cacheKey)!;
+        }
+
         let targetValue = value;
         this.ranges.forEach(range => {
             if (range.isInRange(value)) {
                 targetValue = range.getMapValue(value);
             }
         });
+        TMap.cache.set(cacheKey, targetValue);
         return targetValue;
     }
 }
@@ -95,7 +73,7 @@ export interface SeedRange {
 
 export class Almanac {
     seeds: number[] = [];
-    maps: Map[] = [];
+    maps: TMap[] = [];
     seedRanges: SeedRange[] = [];
 
     constructor(contents: string) {
@@ -105,7 +83,7 @@ export class Almanac {
         this.seeds = seedLine.split(":")[1].split(" ").filter(x => x.trim() !== "").map(x => parseInt(x));
 
         // parse the rest of the lines into maps
-        this.maps = lines.map(x => new Map(x));
+        this.maps = lines.map(x => new TMap(x));
 
         // parse pairs of seeds into ranges
         for (let i = 0; i < this.seeds.length; i += 2) {

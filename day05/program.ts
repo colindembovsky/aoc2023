@@ -2,7 +2,7 @@ import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 import { Almanac } from "./map";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.EASY);
+let contents = loadInput(__dirname, Difficulty.HARD);
 
 console.log(`==== ${day}: PART 1 ====`);
 let almanac = new Almanac(contents);
@@ -13,8 +13,7 @@ console.log(`==== ${day}: PART 2 ====`);
 let seedRange = almanac.seedRanges[0];
 let min = Number.MAX_SAFE_INTEGER;
 for (let i = seedRange.Start; i < seedRange.Start + seedRange.Length; i++) {
-    let location = almanac.mapNum(i, "seed", "soil");
-    console.log(`${i} -> ${location}`);
+    let location = almanac.mapNum(i, "seed", "location");
     if (location < min) {
         min = location;
     }
