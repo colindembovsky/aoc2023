@@ -39,7 +39,6 @@ export class TMap {
     source: string = "";
     target: string = "";
     ranges: Range[] = [];
-    static cache = new Map<string, number>();
 
     constructor(line: string) {
         let lines = line.split("\n").filter(x => x.trim() !== "");
@@ -50,18 +49,12 @@ export class TMap {
     }
 
     getTargetValue(value: number): number {
-        let cacheKey = `${this.source.substring(0,2)}${this.target.substring(0,2)}-${value}`;
-        if (TMap.cache.has(cacheKey)) {
-            return TMap.cache.get(cacheKey)!;
-        }
-
         let targetValue = value;
         this.ranges.forEach(range => {
             if (range.isInRange(value)) {
                 targetValue = range.getMapValue(value);
             }
         });
-        TMap.cache.set(cacheKey, targetValue);
         return targetValue;
     }
 }
@@ -72,6 +65,8 @@ export interface SeedRange {
 }
 
 export class Almanac {
+    static cache = new Map<string, number>();
+
     seeds: number[] = [];
     maps: TMap[] = [];
     seedRanges: SeedRange[] = [];
@@ -94,13 +89,22 @@ export class Almanac {
     mapNum(start: number, sourceType = "seed", targetType = "location"): number {
         let map = this.maps.find(x => x.source === sourceType)!;
         let cur = map.getTargetValue(start);
+        let nextKeys = [];
         while(true) {
+            let key = `${map.source}-${cur}`;
+            if (Almanac.cache.has(key)) {
+                console.log(`Cache hit: ${key}`);
+                return Almanac.cache.get(key)!;
+            }
+
             if (map.target === targetType) {
                 break;
             }
             map = this.maps.find(x => x.source === map.target)!;
             cur = map.getTargetValue(cur);
+            nextKeys.push(`${map.source}-${cur}`);
         }
+        nextKeys.forEach(key => Almanac.cache.set(key, cur));
         return cur;
     }
 }
