@@ -36,10 +36,28 @@ console.log(`==== ${day}: PART 2 ====`);
 let nodes = [...NodeMap.nMap.keys()].filter(k => k.endsWith("A"));
 let maps = nodes.map(n => new NodeMap(n));
 
-while (true) {
-    maps.forEach(m => m.next());
-    NodeMap.curStep++;
-    if (maps.every(m => m.curPos.endsWith("Z"))) break;
-    if (NodeMap.curStep % 1000000 === 0) console.log(NodeMap.curStep);
+// while (true) {
+//     maps.forEach(m => m.next());
+//     NodeMap.curStep++;
+//     if (maps.every(m => m.curPos.endsWith("Z"))) break;
+//     if (NodeMap.curStep % 1000000 === 0) console.log(NodeMap.curStep);
+// }
+// console.log(NodeMap.curStep);
+
+let nums: number[] = [];
+maps.forEach(m => {
+    let n = m.countStepsToTargetWithZ();
+    nums = nums.concat(n);
+});
+
+// find the smallest common multiple of all the numbers
+function gcd(a: number, b: number): number {
+    return b ? gcd(b, a % b) : a;
 }
-console.log(NodeMap.curStep);
+
+function lcm(a: number, b: number): number {
+    return a * b / gcd(a, b);
+}
+
+let result = nums.reduce((a, b) => lcm(a, b));
+console.log(result);  // prints the LCM of the numbers in the array
