@@ -37,4 +37,4 @@ console.log(parts.filter(p => p.isPart).reduce((a, b) => a + b.num, 0));
 // not 525938
 // not 523875
 // not 517228
-//532654
+// not 532654
