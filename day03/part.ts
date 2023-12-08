@@ -1,9 +1,16 @@
 export class Part {
     static lines: string[] = [];
     static symbols: string[] = ["@", "*", "/", "+", "&", "%", "=", "$", "#", "-"];
+    coords = [0, 0, 0 , 0];
 
     constructor(public row: number, public col: number, public num: number, public isPart = false) {
         //this.isPart = this.calcIsPart();
+        this.coords = [
+            Math.max(0, row - 1),
+            Math.max(0, col - 1),
+            Math.min(row + 1, Part.lines.length - 1),
+            Math.min(col + `${num}`.length, Part.lines[row].length - 1)
+        ];
     }
 
     calcIsPart() {
@@ -44,5 +51,10 @@ export class Part {
             }
         }
         return false;
+    }
+
+    isPossibleGearPart(row: number, col: number) {
+        // if row,col is in the coords boundary
+        return row >= this.coords[0] && row <= this.coords[2] && col >= this.coords[1] && col <= this.coords[3];
     }
 }

@@ -21,15 +21,18 @@ let otherInput = `12.......*..
 //console.log(contents);
 let lines = contents.split("\n");
 
-console.log(`==== ${day}: PART 1 ====`);
-
 Part.lines = lines;
 let parts: Part[] = [];
+let gears = new Map<string, Part[]>();
+
 lines.forEach((line, row) => {
     let tmpNum = "";
     let isPart = false;
     for (let c = 0; c < line.length; c++) {
         let char = line[c];
+        if (char === "*") {
+            gears.set(`${row}|${c}`, []);
+        }
         if (char.match(/\d/)) {
             tmpNum += char;
             isPart ||= Part.touchesSymbol(row, c);
@@ -48,19 +51,19 @@ lines.forEach((line, row) => {
     }
 });
 
-//partNums.forEach(num => console.log(num));
-parts.filter(p => p.isPart).forEach(p => console.log(p.num));
-console.log(parts.filter(p => p.isPart).reduce((a, b) => a + b.num, 0));
-// not 330727 (unique numbers)
-// not 535294 (duplicate numbers - but 579 appears once as a part, once as _not_ a part, 988 appears twice etc.)
-// not 539102
-// not 538006
-// not 332375
-// not 525938
-// not 523875
-// not 517228
-// not 532654
-// not 535251
-// not 540073
-// not 532422
-// gosh - 535235
+console.log(`==== ${day}: PART 1 ====`);
+
+let realParts = parts.filter(p => p.isPart);
+console.log(realParts.reduce((a, b) => a + b.num, 0));
+
+console.log(`==== ${day}: PART 2 ====`);
+
+[...gears.keys()].forEach(key => { 
+    console.log(key);
+    let [row, col] = key.split("|").map(x => parseInt(x));
+    realParts.filter(p => p.isPossibleGearPart(row, col)).forEach(p => gears.get(key)?.push(p));
+    //console.log(gears.get(key)?.map(p => p.num));
+});
+
+let gearParts = [...gears.values()].filter(x => x.length === 2);
+console.log(gearParts.map(x => x[0].num * x[1].num).reduce((a, b) => a + b, 0));
