@@ -17,3 +17,14 @@ lines.forEach(line => {
     sum += next;
 });
 console.log(sum);
+
+console.log(`==== ${day}: PART 2 ====`);
+sum = 0;
+lines.forEach(line => {
+    let values = line.split(" ").map(v => parseInt(v));
+    let reading = new Reading(values);
+    let prev = reading.predictPreviousNumber();
+    console.log(prev);
+    sum += prev;
+});
+console.log(sum);

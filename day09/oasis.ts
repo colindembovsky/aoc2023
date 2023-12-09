@@ -22,4 +22,26 @@ export class Reading {
         }
         return sum;
     }
+
+    predictPreviousNumber() {
+        let nextRow: Reading = this;
+        let firstNums = [this.values[0]]
+        while(true) {
+            nextRow = nextRow.getNextRow();
+            if (nextRow.values.every(v => v === 0)) {
+                break;
+            }
+            firstNums.push(nextRow.values[0]);
+        }
+        
+        let counter = 0;
+        while(true) {
+            let num = firstNums.pop();
+            if (num === undefined) {
+                break;
+            }
+            counter = num - counter;
+        }
+        return counter;
+    }
 }
