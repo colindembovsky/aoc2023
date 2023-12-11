@@ -1,8 +1,9 @@
 import exp from "constants";
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
+import { get } from "http";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.EASY);
+let contents = loadInput(__dirname, Difficulty.HARD);
 
 let lines = contents.split("\n");
 
@@ -46,6 +47,47 @@ function expand() {
     }
 }
 
+interface Point {
+    row: number;
+    col: number;
+}
+
+function calcManhattanDist(p1: Point, p2: Point): number {
+    return Math.abs(p1.row - p2.row) + Math.abs(p1.col - p2.col);
+}
+
+function findGalaxies(): Point[] {
+    let galaxies = [];
+    for (let row = 0; row < lines.length; row++) {
+        let line = lines[row];
+        let col = line.indexOf("#");
+        while (col !== -1) {
+            galaxies.push({ row, col });
+            col = line.indexOf("#", col + 1);
+        }
+    }
+    return galaxies;
+}
+
+// create combinations of galaxies
+function getAllGalaxyPairs(galaxies: Point[]): Point[][] {
+    let pairs = [];
+    for (let i = 0; i < galaxies.length; i++) {
+        let p1 = galaxies[i];
+        for (let j = i + 1; j < galaxies.length; j++) {
+            let p2 = galaxies[j];
+            pairs.push([p1, p2]);
+        }
+    }
+    return pairs;
+}
+
 console.log(`==== ${day}: PART 1 ====`);
 expand();
-console.log(lines.join("\n"));
+let galaxies = findGalaxies();
+let pairs = getAllGalaxyPairs(galaxies);
+let dist = 0;
+for (let [p1, p2] of pairs) {
+    dist += calcManhattanDist(p1, p2);
+}
+console.log(dist);
