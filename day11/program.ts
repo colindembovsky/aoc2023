@@ -56,7 +56,7 @@ function indexesBetween(start: number, end: number, indexes: number[]): number {
     for (let index of indexes) {
         if (index > start && index < end || index > end && index < start) count++;
     }
-    return count * indexMultiplier;
+    return count * (indexMultiplier - 1);
 }
 
 interface Point {
@@ -105,16 +105,21 @@ function getAllGalaxyPairs(galaxies: Point[]): Point[][] {
 console.log(`==== ${day}: PART 1 ====`);
 let emptyRowIndexes = getEmptyRowIndexes();
 let emptyColumnIndexes = getEmptyColumnIndexes();
-let indexMultiplier = 1;
+let indexMultiplier = 2;
 
 let galaxies = findGalaxies();
 let pairs = getAllGalaxyPairs(galaxies);
-let dist = 0;
-let distPairs = [];
 
+let dist = 0;
 for (let [p1, p2] of pairs) {
-    let d = calcManhattanDist(p1, p2);
-    distPairs.push([ p1, p2, d ]);    
-    dist += d;
+    dist += calcManhattanDist(p1, p2);
+}
+console.log(dist);
+
+console.log(`==== ${day}: PART 2 ====`);
+indexMultiplier = 1000000;
+dist = 0;
+for (let [p1, p2] of pairs) {
+    dist += calcManhattanDist(p1, p2);
 }
 console.log(dist);
