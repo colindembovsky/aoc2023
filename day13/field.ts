@@ -8,9 +8,7 @@ export class Field {
             throw new Error('Invalid field - neither axis is reflected');
         }
         if (this.horizontalReflectionIndex !== 0 && this.verticalReflectionIndex !== 0) {
-            console.log(`WARNING: Field is reflected on both axes: ${this.horizontalReflectionIndex}, ${this.verticalReflectionIndex}`);
-            console.log(this.rows.join('\n'));
-            this.calcVerticalReflectionIndex();
+            throw new Error('Invalid field - both axes are reflected');
         }
     }
 
@@ -22,17 +20,17 @@ export class Field {
         let indexes = new Set<number>();
         let lineLength = line.length;
 
-        function getLineIndexes(str: string) {
+        function getLineIndexes(str: string, reverse: boolean = false) {
             for (let i = lineLength - 1; i >= 1; i--) {
                 let left = str.substring(0, i);
                 let right = str.substring(i).split('').reverse().join('');
                 if (left.endsWith(right)) {
-                    indexes.add(i);
+                    indexes.add(reverse ? lineLength - i : i);
                 }
             }
         }
         getLineIndexes(line);
-        getLineIndexes(line.split('').reverse().join(''));
+        getLineIndexes(line.split('').reverse().join(''), true);
 
         return [...indexes];
     }
