@@ -98,6 +98,7 @@ export class Almanac {
         let result = new Set<number>();
         arr1.filter(x => x !== 0).forEach(x => { result.add(x); result.add(x - 1); result.add(x + 1); });
         arr2.filter(x => x !== 0).forEach(x => { result.add(x); result.add(x - 1); result.add(x + 1); });
+        return []; // BROKEN
     }
 
     calcApplicableSourceBoundaries(sourceType = "seed", targetType = "location"): number[] {
