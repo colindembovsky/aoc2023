@@ -15,11 +15,5 @@ let seedRange = almanac.seedRanges[0];
 // create a range from seedRange.Start to seedRange.Start + seedRange.Length using the spread operator
 let range = [...Array(seedRange.Length).keys()].map(x => x + seedRange.Start);
 
-let minLocation = range.reduce((prev, cur) => {
-    let curLocation = almanac.mapNum(cur, "seed", "location");
-    if (curLocation < prev) {
-        return curLocation;
-    }
-    return prev;
-}, Number.MAX_SAFE_INTEGER);
-console.log(minLocation);
+let boundaries = almanac.calcApplicableSourceBoundaries();
+console.log(boundaries);
