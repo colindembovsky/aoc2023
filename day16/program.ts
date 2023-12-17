@@ -1,7 +1,7 @@
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.EASY);
+let contents = loadInput(__dirname, Difficulty.HARD);
 let lines = contents.split("\n");
 
 enum Direction {
@@ -11,94 +11,94 @@ enum Direction {
     RIGHT
 };
 
-interface Route {
-    beamId: number;
-    row: number;
-    col: number;
-    direction: Direction;
+class Beam {
+    constructor(public row: number, public col: number, public direction: Direction) {}
+    
+    get posKey() {
+        return `${this.row},${this.col}`;
+    }
+
+    get fullKey() {
+        return `(${this.row}-${this.col}-${this.direction})`;
+    }
 }
 
-function followBeam(route: Route): Route[] {
-    if (route.row < 0 || route.row >= lines.length || route.col < 0 || route.col >= lines[0].length) return [];
-    let tile = lines[route.row][route.col];
-    let key = `${route.row},${route.col}`;
-    let beams = map.get(key) ?? [];
-    // the beam has already been here, so we can stop
-    if (beams.includes(route.beamId)) return [];
+function followBeam(beam: Beam): Beam[] {
+    if (beam.row < 0 || beam.row >= lines.length || beam.col < 0 || beam.col >= lines[0].length) return [];
+    let tile = lines[beam.row][beam.col];
+    let key = beam.posKey;
 
-    // mark this beam as having been here
-    beams.push(route.beamId);
+    // check if we've been here before
+    let beams = map.get(key) || [];
+    if (beams.find(b => b.fullKey === beam.fullKey)) return [];
+
+    // mark this beam as visited
+    beams.push(beam);
     map.set(key, beams);
 
     switch (tile) {
         case ".": {
-            switch(route.direction) {
+            switch(beam.direction) {
                 case Direction.UP:
-                    return [{ beamId: route.beamId, row: route.row - 1, col: route.col, direction: route.direction}];
+                    return [new Beam(beam.row - 1, beam.col, beam.direction)];
                 case Direction.DOWN:
-                    return [{ beamId: route.beamId, row: route.row + 1, col: route.col, direction: route.direction}];
+                    return [new Beam(beam.row + 1, beam.col, beam.direction)];
                 case Direction.LEFT:
-                    return [{ beamId: route.beamId, row: route.row, col: route.col - 1, direction: route.direction}];
+                    return [new Beam(beam.row, beam.col - 1, beam.direction)];
                 case Direction.RIGHT:
-                    return [{ beamId: route.beamId, row: route.row, col: route.col + 1, direction: route.direction}];
+                    return [new Beam(beam.row,  beam.col + 1, beam.direction)];
             }
         }
         case "/": {
-            switch(route.direction) {
+            switch(beam.direction) {
                 case Direction.UP:
-                    return [ { beamId: route.beamId, row: route.row, col: route.col + 1, direction: Direction.RIGHT }];
+                    return [ new Beam(beam.row, beam.col + 1, Direction.RIGHT )];
                 case Direction.DOWN:
-                    return [ { beamId: route.beamId, row: route.row, col: route.col - 1, direction: Direction.LEFT }];
+                    return [ new Beam(beam.row, beam.col - 1, Direction.LEFT )];
                 case Direction.LEFT:
-                    return [ { beamId: route.beamId, row: route.row + 1, col: route.col, direction: Direction.DOWN }];
+                    return [ new Beam(beam.row + 1, beam.col, Direction.DOWN )];
                 case Direction.RIGHT:
-                    return [ { beamId: route.beamId, row: route.row - 1, col: route.col, direction: Direction.UP }];
+                    return [ new Beam(beam.row - 1, beam.col, Direction.UP )];
             }
         }
         case "\\": {
-            switch(route.direction) {
+            switch(beam.direction) {
                 case Direction.UP:
-                    return [ { beamId: route.beamId, row: route.row, col: route.col - 1, direction: Direction.LEFT }];
+                    return [ new Beam(beam.row, beam.col - 1, Direction.LEFT )];
                 case Direction.DOWN:
-                    return [ { beamId: route.beamId, row: route.row, col: route.col + 1, direction: Direction.RIGHT }];
+                    return [ new Beam(beam.row, beam.col + 1, Direction.RIGHT )];
                 case Direction.LEFT:
-                    return [ { beamId: route.beamId, row: route.row - 1, col: route.col, direction: Direction.UP }];
+                    return [ new Beam(beam.row - 1, beam.col, Direction.UP )];
                 case Direction.RIGHT:
-                    return [ { beamId: route.beamId, row: route.row + 1, col: route.col, direction: Direction.DOWN }];
+                    return [ new Beam(beam.row + 1, beam.col, Direction.DOWN )];
             }
         }
         case "-": {
-            switch(route.direction) {
+            switch(beam.direction) {
                 case Direction.UP:
                 case Direction.DOWN:
                 {
-                    let res = [
-                        { beamId: route.beamId + 1, row: route.row, col: route.col + 1, direction: Direction.RIGHT },
-                        { beamId: route.beamId + 1, row: route.row, col: route.col - 1, direction: Direction.LEFT }
+                    return [
+                        new Beam(beam.row, beam.col + 1, Direction.RIGHT ),
+                        new Beam(beam.row, beam.col - 1, Direction.LEFT )
                     ];
-                    beams.push(route.beamId + 1);
-                    map.set(key, beams);
-                    return res;
                 }
-                case Direction.LEFT: return [{ beamId: route.beamId, row: route.row, col: route.col - 1, direction: route.direction }];
-                case Direction.RIGHT: return [{ beamId: route.beamId, row: route.row, col: route.col + 1, direction: route.direction }];
+                case Direction.LEFT: return [new Beam(beam.row, beam.col - 1, beam.direction )];
+                case Direction.RIGHT: return [new Beam(beam.row, beam.col + 1, beam.direction )];
                     
             }
         }
         case "|": {
-            switch(route.direction) {
-                case Direction.UP: return [{ beamId: route.beamId, row: route.row - 1, col: route.col, direction: route.direction }];
-                case Direction.DOWN: return [{ beamId: route.beamId, row: route.row + 1, col: route.col, direction: route.direction }];
+            switch(beam.direction) {
+                case Direction.UP: return [new Beam(beam.row - 1, beam.col, beam.direction )];
+                case Direction.DOWN: return [new Beam(beam.row + 1, beam.col, beam.direction )];
                 case Direction.LEFT:
                 case Direction.RIGHT:
                 {
-                    let res = [
-                        { beamId: route.beamId + 1, row: route.row + 1, col: route.col, direction: Direction.DOWN },
-                        { beamId: route.beamId + 1, row: route.row - 1, col: route.col, direction: Direction.UP }
+                    return [
+                        new Beam(beam.row + 1, beam.col, Direction.DOWN ),
+                        new Beam(beam.row - 1, beam.col, Direction.UP )
                     ];
-                    beams.push(route.beamId + 1);
-                    map.set(key, beams);
-                    return res;
                 }
             }
         }
@@ -107,11 +107,13 @@ function followBeam(route: Route): Route[] {
 }
 
 console.log(`==== ${day}: PART 1 ====`);
-let map = new Map<string, number[]>();
-let stack: Route[] = [{ beamId:0, row: 0, col: 0, direction: Direction.RIGHT }];
+let map = new Map<string, Beam[]>();
+let stack: Beam[] = [new Beam(0, 0, Direction.RIGHT)];
 while (stack.length > 0) {
-    let route = stack.pop()!;
+    let route = stack.shift()!;
     let routes = followBeam(route);
     stack.push(...routes);
 }
 console.log(map.size);
+
+console.log(`==== ${day}: PART 2 ====`);
