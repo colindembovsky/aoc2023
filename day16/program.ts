@@ -122,4 +122,25 @@ console.log(`==== ${day}: PART 1 ====`);
 console.log(sendBeam(0, 0, Direction.RIGHT));
 
 console.log(`==== ${day}: PART 2 ====`);
-// create the start positions
+let startPositions: Beam[] = [];
+for (let col = 0; col < lines[0].length; col++) {
+    startPositions.push(new Beam(0, col, Direction.DOWN));
+}
+for (let row = 0; row < lines.length; row++) {
+    startPositions.push(new Beam(row, 0, Direction.RIGHT));
+}
+for (let row = 0; row < lines.length; row++) {
+    startPositions.push(new Beam(row, lines[0].length - 1, Direction.LEFT));
+}
+for (let col = 0; col < lines[0].length; col++) {
+    startPositions.push(new Beam(lines.length - 1, col, Direction.UP));
+}
+
+// find the start position that has the most beams
+// use the reduce function to keep track of the max
+let max = startPositions.reduce((max, pos) => {
+    let count = sendBeam(pos.row, pos.col, pos.direction);
+    console.log(`(${pos.row}, ${pos.col}, ${pos.direction}) => ${count}`);
+    return Math.max(max, count);
+}, 0);
+console.log(max);
