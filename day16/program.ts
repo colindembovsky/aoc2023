@@ -106,14 +106,20 @@ function followBeam(beam: Beam): Beam[] {
     throw new Error(`Unknown tile ${tile}`);
 }
 
-console.log(`==== ${day}: PART 1 ====`);
 let map = new Map<string, Beam[]>();
-let stack: Beam[] = [new Beam(0, 0, Direction.RIGHT)];
-while (stack.length > 0) {
-    let route = stack.shift()!;
-    let routes = followBeam(route);
-    stack.push(...routes);
+let stack: Beam[] = [];
+
+function sendBeam(row: number, col: number, direction: Direction): number {
+    map.clear();
+    stack = [new Beam(row, col, direction)];
+    while (stack.length > 0) {
+        stack.push(...followBeam(stack.shift()!));
+    }
+    return map.size;
 }
-console.log(map.size);
+
+console.log(`==== ${day}: PART 1 ====`);
+console.log(sendBeam(0, 0, Direction.RIGHT));
 
 console.log(`==== ${day}: PART 2 ====`);
+// create the start positions
