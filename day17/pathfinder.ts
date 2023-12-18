@@ -61,8 +61,9 @@ export class PathFinder {
             }
             
             if (row === this.grid.length - 1 && col === this.grid[0].length - 1) {
-                if (route.heatLoss < smallestHeatLoss) {
-                    smallestHeatLoss = route.heatLoss;
+                let finalHeatLoss = route.heatLoss + this.grid[row][col];
+                if (finalHeatLoss < smallestHeatLoss) {
+                    smallestHeatLoss = finalHeatLoss;
                 }
                 continue;
             }
@@ -112,9 +113,8 @@ export class PathFinder {
     }
 
     findSmallestHeatLossPath(): number {
-        let lastCell = this.grid[this.grid.length - 1][this.grid[0].length - 1];
         let heatLossDown = this.findSmallestHeatLossPathGoing(Direction.DOWN);
         let heatLossRight = this.findSmallestHeatLossPathGoing(Direction.RIGHT);
-        return Math.min(heatLossDown, heatLossRight) + lastCell;
+        return Math.min(heatLossDown, heatLossRight);
     }
 }
