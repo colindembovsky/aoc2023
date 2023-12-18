@@ -50,8 +50,8 @@ export class PathFinder {
         queue.push(new Route(0, 0, startDir, -this.startCellHeatLoss));
         let smallestHeatLoss = Number.MAX_SAFE_INTEGER;
         while (queue.length > 0) {
-            if (queue.length % 1000 === 0) {
-                console.log(`queue length: ${queue.length}`);
+            if (queue.length % 5000 === 0) {
+                console.log(`${queue.length}`);
             }
             const route = queue.shift()!;
             const { row, col, direction } = route;
@@ -115,6 +115,8 @@ export class PathFinder {
     findSmallestHeatLossPath(): number {
         let heatLossDown = this.findSmallestHeatLossPathGoing(Direction.DOWN);
         let heatLossRight = this.findSmallestHeatLossPathGoing(Direction.RIGHT);
+        console.log(`heat loss down: ${heatLossDown}`);
+        console.log(`heat loss right: ${heatLossRight}`);
         return Math.min(heatLossDown, heatLossRight);
     }
 }
