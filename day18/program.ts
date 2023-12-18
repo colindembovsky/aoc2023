@@ -9,6 +9,5 @@ let lines = contents.split("\n");
 console.log(`==== ${day}: PART 1 ====`);
 let lavaField = new LavaField(lines);
 lavaField.digField();
-//let total = lavaField.floodFillFrom(1, 1);
-//console.log(total);
-console.log(lavaField.field.join("\n"));
+let total = lavaField.floodFill();
+console.log(total);

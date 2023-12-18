@@ -59,15 +59,15 @@ export class LavaField {
 
     digRight(steps: number, color: string) {
         // expand the field if necessary
-        let expand = this.curCol + steps - this.width
+        let expand = this.curCol + steps + 1 - this.width;
         if (expand > 0) {
             if (this.length == 0) {
                 this.field.push("");
                 this.curCol = -1;
             }
             let ground = ".".repeat(expand);
-            for (let r in this.field) {
-                r += ground;
+            for (let i = 0; i < this.length; i++) {
+                this.field[i] += ground;
             }
         }
 
@@ -146,6 +146,27 @@ export class LavaField {
         }
 
         this.curRow -= steps;
+    }
+
+    floodFill() {
+        // work out the first cell inside the shape
+        let startRow = 0;
+        let startCol = 0;
+        while (true) {
+            if (this.field[startRow][startCol] === "#") {
+                // if the cell below is empty, we've found the start
+                if (this.field[startRow + 1][startCol] === ".") {
+                    startRow++;
+                    break;
+                }
+            }
+            startCol++;
+            if (startCol >= this.width) {
+                startCol = 0;
+                startRow++;
+            }
+        }
+        return this.floodFillFrom(startRow, startCol);
     }
 
     floodFillFrom(row: number, col: number): number {
