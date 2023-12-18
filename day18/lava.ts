@@ -39,25 +39,25 @@ export class LavaField {
     dig(instruction: Instruction) {
         switch (instruction.direction) {
             case "R": {
-                this.digRight(instruction.steps, instruction.color);
+                this.digRight(instruction.steps);
                 break;
             }
             case "L": {
-                this.digLeft(instruction.steps, instruction.color);
+                this.digLeft(instruction.steps);
                 break;
             }
             case "U": {
-                this.digUp(instruction.steps, instruction.color);
+                this.digUp(instruction.steps);
                 break;
             }
             case "D": {
-                this.digDown(instruction.steps, instruction.color);
+                this.digDown(instruction.steps);
                 break;
             }
         }
     }
 
-    digRight(steps: number, color: string) {
+    digRight(steps: number) {
         // expand the field if necessary
         let expand = this.curCol + steps + 1 - this.width;
         if (expand > 0) {
@@ -82,7 +82,7 @@ export class LavaField {
         this.curCol += steps;
     }
 
-    digDown(steps: number, color: string) {
+    digDown(steps: number) {
         let expand = this.curRow + 1 + steps - this.field.length;
         if (expand > 0) {
             let ground = ".".repeat(this.width);
@@ -102,7 +102,7 @@ export class LavaField {
         this.curRow += steps;
     }
 
-    digLeft(steps: number, color: string) {
+    digLeft(steps: number) {
         // expand the field if necessary
         let expand = steps - this.curCol;
         if (expand > 0) {
@@ -127,7 +127,7 @@ export class LavaField {
         this.curCol -= steps;
     }
 
-    digUp(steps: number, color: string) {
+    digUp(steps: number) {
         let expand = this.curRow - steps;
         if (expand < 0) {
             let ground = ".".repeat(this.width);

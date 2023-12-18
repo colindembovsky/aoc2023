@@ -1,4 +1,3 @@
-import { join } from "path";
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 import { LavaField } from "./lava";
 
