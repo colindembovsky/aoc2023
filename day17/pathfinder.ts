@@ -1,122 +1,83 @@
-import { dir } from "console";
+export class Direction {
+    constructor(public row: number, public col: number) {}
 
-export enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
+    add(other: Direction) {
+        return new Direction(this.row + other.row, this.col + other.col);
+    } 
+
+    reverse() { return new Direction(-this.row, -this.col); }
+    turnLeft() { return new Direction(-this.col, this.row); }
+    turnRight() { return new Direction(this.col, -this.row); }
+
+    static up = new Direction(-1, 0);
+    static down = new Direction(1, 0);
+    static left = new Direction(0, -1);
+    static right = new Direction(0, 1);
 }
 
-export class Route {
-    directionCounter: { [key in Direction]: number };
+export class Position {
+    constructor(public row: number, public col: number) {}
 
-    constructor(public row: number, public col: number, public direction: Direction, public heatLoss: number = 0) {
-        this.directionCounter = {
-            [Direction.UP]: 0,
-            [Direction.DOWN]: 0,
-            [Direction.LEFT]: 0,
-            [Direction.RIGHT]: 0,
-        };
+    clone() { return new Position(this.row, this.col); }
+    up() { return new Position(this.row - 1, this.col); }
+    down() { return new Position(this.row + 1, this.col); }
+    left() { return new Position(this.row, this.col - 1); }
+    right() { return new Position(this.row, this.col + 1); }
+    
+    move(dir: Direction) {
+        return new Position(this.row + dir.row, this.col + dir.col );
     }
+}
 
-    from(row: number, col: number, inDirection: Direction, heatLoss: number): Route {
-        let route = new Route(row, col, inDirection, this.heatLoss + heatLoss);
-        if (this.direction !== inDirection) {
-            // reset the direction counter
-            route.directionCounter = {
-                [Direction.UP]: 0,
-                [Direction.DOWN]: 0,
-                [Direction.LEFT]: 0,
-                [Direction.RIGHT]: 0,
-            };
-        } else {
-            route.directionCounter = { ...this.directionCounter };
-        }
-        route.directionCounter[inDirection]++;
-        return route;
-    }
+export interface Route {
+    position: Position;
+    direction: Direction;
+    distance: number;
 }
 
 export class PathFinder {
     grid: number[][] = [];
+    visited = new Set<string>();
+    heatLoss = 0;
+    finished = false;
+    queue: Route[][] = [[{ position: new Position(0, 0), direction: Direction.right, distance: 0 }]];
 
-    constructor(lines: string[], private startCellHeatLoss: number) {
+    constructor(lines: string[]) {
         this.grid = lines.map(l => l.split('').map(c => parseInt(c)));
     }
 
-    public findSmallestHeatLossPathGoing(startDir: Direction): number {
-        const queue: Route[] = [];
-        const smallestHeatLossAtNode: number[][] = Array(this.grid.length).fill(Number.MAX_SAFE_INTEGER).map(() => Array(this.grid[0].length).fill(Number.MAX_SAFE_INTEGER));
-        queue.push(new Route(0, 0, startDir, -this.startCellHeatLoss));
-        let smallestHeatLoss = Number.MAX_SAFE_INTEGER;
-        while (queue.length > 0) {
-            if (queue.length % 5000 === 0) {
-                console.log(`${queue.length}`);
-            }
-            const route = queue.shift()!;
-            const { row, col, direction } = route;
-
-            if (row < 0 || row >= this.grid.length || col < 0 || col >= this.grid[0].length || route.heatLoss >= smallestHeatLossAtNode[row][col]) {
-                continue;
-            }
-            
-            if (row === this.grid.length - 1 && col === this.grid[0].length - 1) {
-                let finalHeatLoss = route.heatLoss + this.grid[row][col];
-                if (finalHeatLoss < smallestHeatLoss) {
-                    smallestHeatLoss = finalHeatLoss;
-                }
-                continue;
-            }
-            
-            smallestHeatLossAtNode[row][col] = route.heatLoss;
-            const heatLoss = this.grid[row][col];
-            switch (direction) {
-                case Direction.UP:
-                {
-                    if (route.directionCounter[Direction.UP] < 3) {
-                        queue.push(route.from(row - 1, col, Direction.UP, heatLoss));
-                    }
-                    queue.push(route.from(row, col - 1, Direction.LEFT, heatLoss));
-                    queue.push(route.from(row, col + 1, Direction.RIGHT, heatLoss));
-                    break;
-                }
-                case Direction.DOWN:
-                {
-                    if (route.directionCounter[Direction.DOWN] < 3) {
-                        queue.push(route.from(row + 1, col, Direction.DOWN, heatLoss));
-                    }
-                    queue.push(route.from(row, col - 1, Direction.LEFT, heatLoss));
-                    queue.push(route.from(row, col + 1, Direction.RIGHT, heatLoss));
-                    break;
-                }
-                case Direction.LEFT:
-                {
-                    if (route.directionCounter[Direction.LEFT] < 3) {
-                        queue.push(route.from(row, col - 1, Direction.LEFT, heatLoss));
-                    }
-                    queue.push(route.from(row - 1, col, Direction.UP, heatLoss));
-                    queue.push(route.from(row + 1, col, Direction.DOWN, heatLoss));
-                    break;
-                }
-                case Direction.RIGHT:
-                {
-                    if (route.directionCounter[Direction.RIGHT] < 3) {
-                        queue.push(route.from(row, col + 1, Direction.RIGHT, heatLoss));
-                    }
-                    queue.push(route.from(row - 1, col, Direction.UP, heatLoss));
-                    queue.push(route.from(row + 1, col, Direction.DOWN, heatLoss));
-                    break;
-                }
-            }
+    move(route: Route, direction: Direction) {
+        let next: Route = {
+            position: route.position.move(direction),
+            direction: direction,
+            distance: direction === route.direction ? route.distance + 1 : 1
+        };
+        if (next.distance > 3 || next.position.row < 0 || next.position.col < 0 || next.position.row >= this.grid.length || next.position.col >= this.grid[0].length) {
+            return;
         }
-        return smallestHeatLoss;
+
+        let key = `${next.position.row}-${next.position.col}-${next.direction.row}-${next.direction.col}-${next.distance}`;
+        if (this.visited.has(key)) {
+            return;
+        }
+
+        this.visited.add(key);
+        let newHeatLoss = this.heatLoss + this.grid[next.position.row][next.position.col];
+        this.queue[newHeatLoss] = this.queue[newHeatLoss] ?? [];
+        this.queue[newHeatLoss].push(next);
     }
 
-    findSmallestHeatLossPath(): number {
-        let heatLossDown = this.findSmallestHeatLossPathGoing(Direction.DOWN);
-        let heatLossRight = this.findSmallestHeatLossPathGoing(Direction.RIGHT);
-        console.log(`heat loss down: ${heatLossDown}`);
-        console.log(`heat loss right: ${heatLossRight}`);
-        return Math.min(heatLossDown, heatLossRight);
+    public findRoute(): number {
+        for (let route of this.queue[this.heatLoss] ?? []) {
+            if (route.position.row === this.grid.length - 1 && route.position.col === this.grid[0].length - 1) {
+                this.finished = true;
+                return this.heatLoss;
+            }
+            this.move(route, route.direction);
+            this.move(route, route.direction.turnLeft());
+            this.move(route, route.direction.turnRight());
+        }
+        this.heatLoss++;
+        return this.findRoute();
     }
 }
