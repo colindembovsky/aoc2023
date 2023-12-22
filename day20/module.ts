@@ -24,7 +24,6 @@ export class Mod {
     inputs: Mod[] = [];
     outputs: Mod[] = [];
     type = ModType.Unspecified;
-    pulseCount: { [key in Pulse]: number } = { [Pulse.High]: 0, [Pulse.Low]: 0 };
 
     constructor(public name: string) { }
 
@@ -32,13 +31,15 @@ export class Mod {
         return `${this.name}`;
     }
 
-    resetPulseCount() {
-        this.pulseCount = { [Pulse.High]: 0, [Pulse.Low]: 0 };
+    send(from: string, pulse: Pulse): IPulseOnWire[] {
+        return [];
     }
 
-    send(from: string, pulse: Pulse): IPulseOnWire[] {
-        this.pulseCount[pulse]++;
-        return [];
+    addOutput(mod: Mod) {
+        this.outputs.push(mod);
+    }
+
+    addInput(mod: Mod) {
     }
 
     static parseModules(lines: string[]) {
@@ -75,8 +76,8 @@ export class Mod {
             let mod = modules.get(name)!;
             for (let output of outputs) {
                 let outputMod = modules.get(output) ?? new Mod(output);
-                mod.outputs.push(outputMod);
-                outputMod.inputs.push(mod);
+                mod.addOutput(outputMod);
+                outputMod.addInput(mod);
             }
         }
         return modules;
@@ -125,24 +126,20 @@ export class ConjunctionMod extends Mod {
         return `${this.name}-${[...this.inputMap.entries()].map(([k, v]) => `${k}-${v}`).join(",")}`;
     }
 
+    addInput(mod: Mod) {
+        this.inputMap.set(mod.name, Pulse.Low);
+    }
+
     send(from: string, pulse: Pulse) {
         super.send(from, pulse);
         this.inputMap.set(from, pulse);
         
-        let allHigh = true;
-        let allLow = true;
-        for (let [_, v] of this.inputMap) {
-            if (v === Pulse.Low) allHigh = false;
-            if (v === Pulse.High) allLow = false;
-        }
-        let nextPulse = Pulse.Low;
-        if (allLow) nextPulse = Pulse.High;
+        let allHigh = [...this.inputMap.values()].every(v => v === Pulse.High );
+        let nextPulse = allHigh ? Pulse.Low : Pulse.High;
         
         let onwardPulses = [];
-        if (allHigh || allLow) {
-            for (let o of this.outputs) {
-                onwardPulses.push({ from: this.name, to: o, pulse: nextPulse });
-            }
+        for (let o of this.outputs) {
+            onwardPulses.push({ from: this.name, to: o, pulse: nextPulse });
         }
         return onwardPulses;
     }
