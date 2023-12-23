@@ -1,5 +1,5 @@
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
-import { Mod, Pulse } from "./module";
+import { Mod, Pulse, getLCM, getGCD } from "./module";
 import * as crypto from "crypto";
 
 let day = dayName(__dirname);
@@ -16,7 +16,7 @@ let modules = Mod.parseModules(lines);
 
 function getHash() {
     let hash = crypto.createHash("md5");
-    let globalState = [...modules.values()].map(m => m.stateString).join("");
+    let globalState = [...modules.values()].map(m => m.stateString).join("|");
     hash.update(globalState);
     return hash.digest("hex");
 }
@@ -38,10 +38,6 @@ for (let i = 0; i < 1000; i++) {
         let pulseOnWire = pulsesOnWire.shift()!;
         //console.log(`${pulseOnWire.from} -${Pulse[pulseOnWire.pulse]}-> ${pulseOnWire.to.name}`);
         for (let p of pulseOnWire.to.send(pulseOnWire.from, pulseOnWire.pulse)) {
-            if (p.to.name === "rx" && p.pulse === Pulse.Low) {
-                console.log(`Found low pulse on rx after ${i} iterations`);
-                break;
-            }
             pulsesOnWire.push(p);
             if (p.pulse === Pulse.High) {
                 high++;
@@ -63,24 +59,33 @@ console.log(`Multiplier: ${multiplier}`);
 console.log(`Answer: ${totalHigh * totalLow * multiplier * multiplier}`);
 
 console.log(`==== ${day}: PART 2 ====`);
-totalHigh = 0;
-totalLow = 0;
-let i = 0;
-while (true) {
-    i++;
-    let pulsesOnWire = [{ from: "button", to: modules.get("broadcaster")!, pulse: Pulse.Low }];
+modules = Mod.parseModules(lines);
+let rgMod = modules.get("rg")!; // this is the input to rx
+let map = new Map<string, number>();
+// each input to rg must be high for it to send a low to rx
+[...rgMod.inputMap.keys()].forEach(k => map.set(k, 0));
 
+let i = 0;
+while(true) {
+    i++;
+    if (i % 10000 === 0) console.log(`Iteration ${i / 1000000}M`);
+    let pulsesOnWire = [{ from: "button", to: modules.get("broadcaster")!, pulse: Pulse.Low }];
     while (pulsesOnWire.length > 0) {
         let pulseOnWire = pulsesOnWire.shift()!;
         for (let p of pulseOnWire.to.send(pulseOnWire.from, pulseOnWire.pulse)) {
-            if (p.to.name === "rx" && p.pulse === Pulse.Low) {
-                console.log(`Found low pulse on rx after ${i} iterations`);
-                break;
-            }
             pulsesOnWire.push(p);
+            if (p.pulse === Pulse.High && map.has(p.from)) {
+                map.set(p.from, i);
+            }
         }
     }
-    if (i % 1000000 === 0) {
-        console.log(`${i / 1000000}M iterations`);
-    }    
+
+    if ([...map.values()].every(v => v !== 0)) {
+        break;
+    }
 }
+
+[...map.entries()].forEach(([k, v]) => console.log(`${k}: ${v}`));
+let nums = [...map.values()].map(v => v);
+let lcm = getLCM(nums);
+console.log(`Button presses needed: ${lcm}`);

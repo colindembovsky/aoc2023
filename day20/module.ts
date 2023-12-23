@@ -21,7 +21,7 @@ export interface IPulseOnWire {
 }
 
 export class Mod {
-    inputs: Mod[] = [];
+    inputMap = new Map<string, Pulse>();
     outputs: Mod[] = [];
     type = ModType.Unspecified;
 
@@ -29,6 +29,9 @@ export class Mod {
 
     get stateString() {
         return `${this.name}`;
+    }
+
+    setState(state: string) {
     }
 
     send(from: string, pulse: Pulse): IPulseOnWire[] {
@@ -92,6 +95,11 @@ export class FlipFlopMod extends Mod {
         this.type = ModType.FlipFlop;
     }
 
+    setState(state: string) {
+        let [_, isOn] = state.split("-");
+        this.isOn = isOn === "1";
+    }
+
     get stateString() {
         return `${this.name}-${this.isOn ? "1" : "0"}`;
     }
@@ -115,8 +123,6 @@ export class FlipFlopMod extends Mod {
 }
 
 export class ConjunctionMod extends Mod {
-    inputMap = new Map<string, Pulse>();
-
     constructor(name: string) {
         super(name);
         this.type = ModType.Conjunction;
@@ -124,6 +130,14 @@ export class ConjunctionMod extends Mod {
 
     get stateString() {
         return `${this.name}-${[...this.inputMap.entries()].map(([k, v]) => `${k}-${v}`).join(",")}`;
+    }
+
+    setState(state: string) {
+        let states = state.split(",");
+        for (let s of states) {
+            let [name, pulse] = s.split("-");
+            this.inputMap.set(name, pulse === "1" ? Pulse.High : Pulse.Low);
+        }
     }
 
     addInput(mod: Mod) {
@@ -158,4 +172,17 @@ export class BroadCasterMod extends Mod {
         }
         return onwardPulses;
     }
+}
+
+export function getGCD(a: number, b: number): number {
+    if (b === 0) return a;
+    return getGCD(b, a % b);
+}
+
+export function getLCM(nums: number[]) {
+    let lcm = nums[0];
+    for (let i = 1; i < nums.length; i++) {
+        lcm = (lcm * nums[i]) / getGCD(lcm, nums[i]);
+    }
+    return lcm;
 }
