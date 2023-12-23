@@ -173,16 +173,3 @@ export class BroadCasterMod extends Mod {
         return onwardPulses;
     }
 }
-
-export function getGCD(a: number, b: number): number {
-    if (b === 0) return a;
-    return getGCD(b, a % b);
-}
-
-export function getLCM(nums: number[]) {
-    let lcm = nums[0];
-    for (let i = 1; i < nums.length; i++) {
-        lcm = (lcm * nums[i]) / getGCD(lcm, nums[i]);
-    }
-    return lcm;
-}

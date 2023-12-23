@@ -1,5 +1,6 @@
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
-import { Mod, Pulse, getLCM, getGCD } from "./module";
+import { lcm } from "../utils/mathUtils";
+import { Mod, Pulse  } from "./module";
 import * as crypto from "crypto";
 
 let day = dayName(__dirname);
@@ -87,5 +88,5 @@ while(true) {
 
 [...map.entries()].forEach(([k, v]) => console.log(`${k}: ${v}`));
 let nums = [...map.values()].map(v => v);
-let lcm = getLCM(nums);
-console.log(`Button presses needed: ${lcm}`);
+let result = lcm(nums);
+console.log(`Button presses needed: ${result}`);

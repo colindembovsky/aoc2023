@@ -1,4 +1,5 @@
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
+import { lcm } from "../utils/mathUtils";
 import { NodeMap } from "./mapEntry";
 
 let day = dayName(__dirname);
@@ -50,14 +51,4 @@ maps.forEach(m => {
     nums = nums.concat(n);
 });
 
-// find the smallest common multiple of all the numbers
-function gcd(a: number, b: number): number {
-    return b ? gcd(b, a % b) : a;
-}
-
-function lcm(a: number, b: number): number {
-    return a * b / gcd(a, b);
-}
-
-let result = nums.reduce((a, b) => lcm(a, b));
-console.log(result);  // prints the LCM of the numbers in the array
+console.log(lcm(nums));
