@@ -1,0 +1,76 @@
+export class CharMap {
+    constructor(private lines: string[]) { }
+
+    get width(): number {
+        return this.lines[0].length;
+    }
+
+    get height(): number {
+        return this.lines.length;
+    }
+
+    get(pos: Position): string | undefined {
+        return this.getAt(pos.row, pos.col);
+    }
+
+    getAt(row: number, col: number): string | undefined {
+        if (row < 0 || row >= this.height) {
+            return undefined;
+        }
+        let line = this.lines[row];
+        if (col < 0 || col >= this.width) {
+            return undefined;
+        }
+        return line[col];
+    }
+}
+
+export class Direction {
+    constructor(public row: number, public col: number) {}
+
+    add(other: Direction) {
+        return new Direction(this.row + other.row, this.col + other.col);
+    } 
+
+    reverse() { return new Direction(-this.row, -this.col); }
+    turnLeft() { return new Direction(-this.col, this.row); }
+    turnRight() { return new Direction(this.col, -this.row); }
+    turnUp() { return new Direction(-this.row, this.col); }
+    turnDown() { return new Direction(this.row, -this.col); }
+
+    static up = new Direction(-1, 0);
+    static down = new Direction(1, 0);
+    static left = new Direction(0, -1);
+    static right = new Direction(0, 1);
+}
+
+export class Position {
+    constructor(public row: number, public col: number) {}
+
+    clone() { return new Position(this.row, this.col); }
+    up() { return new Position(this.row - 1, this.col); }
+    down() { return new Position(this.row + 1, this.col); }
+    left() { return new Position(this.row, this.col - 1); }
+    right() { return new Position(this.row, this.col + 1); }
+
+    toString() {
+        return `(${this.row},${this.col})`;
+    }
+    
+    getNeighbors(minRow = 0, maxRow = Number.MAX_SAFE_INTEGER, minCol = 0, maxCol = Number.MAX_SAFE_INTEGER): Position[] {
+        let possible = [this.up(), this.down(), this.left(), this.right()];
+        return possible.filter(p => p.row >= minRow && p.row < maxRow && p.col >= minCol && p.col < maxCol);
+    }
+
+    getNeighborsIncludingDiagonal(minRow = 0, maxRow = Number.MAX_SAFE_INTEGER, minCol = 0, maxCol = Number.MAX_SAFE_INTEGER): Position[] {
+        let possible = this.getNeighbors(minRow, maxRow, minCol, maxCol).concat([
+            this.up().left(), this.up().right(),
+            this.down().left(), this.down().right()
+        ]);
+        return possible.filter(p => p.row >= minRow && p.row < maxRow && p.col >= minCol && p.col < maxCol);
+    }
+    
+    move(dir: Direction) {
+        return new Position(this.row + dir.row, this.col + dir.col );
+    }
+}
