@@ -23,6 +23,10 @@ class GardenPos extends Position {
     get(pos: GardenPos): string | undefined {
         return garden.get(this);
     }
+
+    get isEdge(): boolean {
+        return this.row === 0 || this.row === garden.height - 1 || this.col === 0 || this.col === garden.width - 1;
+    }
 }
 
 console.log(`==== ${day}: PART 1 ====`);
@@ -50,18 +54,58 @@ function printReachable(reachable: GardenPos[]) {
 
 let stack = [start];
 let steps = 64;
-for (let step = 0; step < steps; step++) {
-    let nextStack = [];
-    for (let pos of stack) {
-        for (let n of pos!.canReach) {
-            n.resolveNeighbors();
-            let onStack = nextStack.find(p => p.row === n.row && p.col === n.col);
-            if (!onStack) {
-                nextStack.push(n);
-            }
-        }
-    }
-    stack = nextStack;
-}
+// for (let step = 0; step < steps; step++) {
+//     let nextStack = [];
+//     for (let pos of stack) {
+//         for (let n of pos!.canReach) {
+//             n.resolveNeighbors();
+//             let onStack = nextStack.find(p => p.row === n.row && p.col === n.col);
+//             if (!onStack) {
+//                 nextStack.push(n);
+//             }
+//         }
+//     }
+//     stack = nextStack;
+// }
 //printReachable(stack);
 console.log(stack.length);
+
+console.log(`==== ${day}: PART 1 alternate ====`);
+let shortestDistanceFromStart = new Map<string, number>();
+stack = [start];
+shortestDistanceFromStart.set(start.toString(), 0);
+while (stack.length > 0) {
+    let pos = stack.pop()!;
+    for (let n of pos.canReach) {
+        let dist = shortestDistanceFromStart.get(pos.toString())! + 1;
+        let nDist = shortestDistanceFromStart.get(n.toString()) ?? Number.MAX_SAFE_INTEGER;
+        if (dist < nDist) {
+            shortestDistanceFromStart.set(n.toString(), dist);
+        }
+        stack.push(n);
+    }
+}
+let reachable = Array.from(shortestDistanceFromStart.entries()).filter(([_, v]) => v <= steps && v % 2 === 0);
+console.log(reachable.length);
+
+console.log(`==== ${day}: PART 2 ====`);
+let shortestDistanceToEdge = new Map<string, number>();
+let topCorner = new GardenPos(0, 0);
+topCorner.resolveNeighbors();
+stack = [topCorner];
+let curDist = 1;
+while (stack.length > 0) {
+    let pos = stack.pop()!;
+    for (let n of pos.canReach) {
+        n.resolveNeighbors();
+        if (n.isEdge) {
+            let nDist = shortestDistanceToEdge.get(n.toString()) ?? Number.MAX_SAFE_INTEGER;
+            if (curDist < nDist) {
+                shortestDistanceToEdge.set(n.toString(), curDist);
+            }
+        }
+        stack.push(n);
+    }
+    curDist++;
+}
+console.log("Worked out edge distances");
