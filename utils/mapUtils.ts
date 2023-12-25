@@ -9,8 +9,27 @@ export class CharMap {
         return this.lines.length;
     }
 
+    clone(): CharMap {
+        return new CharMap(this.lines);
+    }
+
     get(pos: Position): string | undefined {
         return this.getAt(pos.row, pos.col);
+    }
+
+    set(pos: Position, value: string) {
+        this.setAt(pos.row, pos.col, value);
+    }
+
+    setAt(row: number, col: number, value: string) {
+        if (row < 0 || row >= this.height) {
+            throw new Error(`Invalid row ${row}`);
+        }
+        let line = this.lines[row];
+        if (col < 0 || col >= this.width) {
+            throw new Error(`Invalid col ${col}`);
+        }
+        this.lines[row] = line.substring(0, col) + value + line.substring(col + 1);
     }
 
     getAt(row: number, col: number): string | undefined {
@@ -22,6 +41,10 @@ export class CharMap {
             return undefined;
         }
         return line[col];
+    }
+
+    toString() {
+        return this.lines.join("\n");
     }
 }
 

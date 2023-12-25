@@ -2,7 +2,7 @@ import { CharMap, Position } from "../utils/mapUtils";
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.EASY);
+let contents = loadInput(__dirname, Difficulty.HARD);
 let lines = contents.split("\n");
 let garden = new CharMap(lines);
 
@@ -14,7 +14,7 @@ class GardenPos extends Position {
 
     resolveNeighbors() {
         for (let n of this.getNeighbors(0, garden.height, 0, garden.width)) {
-            if (garden.get(n) == ".") {
+            if (garden.get(n) !== "#") {
                 this.canReach.push(new GardenPos(n.row, n.col));
             }
         }
@@ -28,7 +28,7 @@ class GardenPos extends Position {
 console.log(`==== ${day}: PART 1 ====`);
 
 // see how many leaf nodes we get to in 6 steps
-let start;
+let start: GardenPos | undefined;
 for (let row = 0; row < garden.height; row++) {
     for (let col = 0; col < garden.width; col++) {
         if (garden.getAt(row, col) == "S") {
@@ -39,19 +39,28 @@ for (let row = 0; row < garden.height; row++) {
     }
 }
 
-let reachable = new Map<string, GardenPos>();
-reachable.set(start!.toString(), start!);
+function printReachable(reachable: GardenPos[]) {
+    let map = garden.clone();
+    for (let pos of reachable) {
+        map.set(pos, "O");
+    }
+    console.log(map.toString());
+}
+
 let stack = [start!];
-for (let step = 0; step < 6; step++) {
+let steps = 64;
+for (let step = 0; step < steps; step++) {
     let nextStack = [];
     for (let pos of stack) {
         for (let n of pos!.canReach) {
-            if (!reachable.has(n.toString())) {
-                reachable.set(n.toString(), n);
+            n.resolveNeighbors();
+            let onStack = nextStack.find(p => p.row === n.row && p.col === n.col);
+            if (!onStack) {
                 nextStack.push(n);
             }
         }
     }
     stack = nextStack;
 }
-console.log(reachable.size);
+//printReachable(stack);
+console.log(stack.length);
