@@ -2,7 +2,7 @@ import { CharMap, Position } from "../utils/mapUtils";
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.HARD);
+let contents = loadInput(__dirname, Difficulty.EASY);
 let lines = contents.split("\n");
 let garden = new CharMap(lines);
 
@@ -38,6 +38,7 @@ for (let row = 0; row < garden.height; row++) {
         }
     }
 }
+start = start!;
 
 function printReachable(reachable: GardenPos[]) {
     let map = garden.clone();
@@ -47,7 +48,7 @@ function printReachable(reachable: GardenPos[]) {
     console.log(map.toString());
 }
 
-let stack = [start!];
+let stack = [start];
 let steps = 64;
 for (let step = 0; step < steps; step++) {
     let nextStack = [];
