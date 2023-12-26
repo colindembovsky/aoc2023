@@ -10,6 +10,19 @@ interface Point {
     z: number;
 }
 
+function arraysContainSameElements(a: any[], b: any[]): boolean {
+    if (a.length !== b.length) return false;
+
+    let sortedA = a.slice().sort();
+    let sortedB = b.slice().sort();
+
+    for (let i = 0; i < sortedA.length; i++) {
+        if (sortedA[i] !== sortedB[i]) return false;
+    }
+
+    return true;
+}
+
 class Brick {
     static bricks: Brick[] = [];
     start: Point;
@@ -70,6 +83,17 @@ class Brick {
         this.supportedBy = Brick.bricks.filter(brick => brick !== this && brick.intersectsZAt(this.minZ - 1) && brick.overlapsVertically(this));
         this.supports = Brick.bricks.filter(brick => brick !== this && brick.intersectsZAt(this.maxZ + 1) && brick.overlapsVertically(this));
     }
+
+    numberOfBricksAboveWouldFallIfThisWasDisintegrated(): number {
+        let totalSupportedByThis = 0;
+        let current: Brick[] = [this];
+        while(current.length > 0) {
+            let bricksOnlySupportedByCurrent = Brick.bricks.filter(b => arraysContainSameElements(b.supportedBy, current));
+            totalSupportedByThis += bricksOnlySupportedByCurrent.length;
+            current = bricksOnlySupportedByCurrent;
+        }
+        return totalSupportedByThis;
+    }
 }
 
 console.log(`==== ${day}: PART 1 ====`);
@@ -105,3 +129,9 @@ let safeToDisintegrate = Brick.bricks.filter(brick =>
     ).length === 0
 );
 console.log(safeToDisintegrate.length);
+
+console.log(`==== ${day}: PART 2 ====`);
+Brick.bricks.forEach(b => console.log(b.numberOfBricksAboveWouldFallIfThisWasDisintegrated()));
+let sumFalling = Brick.bricks.reduce((a, b) => a + b.numberOfBricksAboveWouldFallIfThisWasDisintegrated(), 0);
+console.log(sumFalling);
+// 2207 is too low
