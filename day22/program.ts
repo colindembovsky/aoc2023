@@ -1,7 +1,7 @@
 import { loadInput, dayName, Difficulty } from "../utils/readUtils";
 
 let day = dayName(__dirname);
-let contents = loadInput(__dirname, Difficulty.EASY);
+let contents = loadInput(__dirname, Difficulty.HARD);
 let lines = contents.split("\n");
 
 interface Point {
@@ -11,8 +11,11 @@ interface Point {
 }
 
 class Brick {
+    static bricks: Brick[] = [];
     start: Point;
     end: Point;
+    supports: Brick[] = [];
+    supportedBy: Brick[] = [];
 
     constructor(line: string) {
         let [left, right] = line.split("~");
@@ -54,23 +57,51 @@ class Brick {
         this.end.z--;
     }
 
-    overlapBrickInZ(other: Brick): boolean {
+    overlapsVertically(other: Brick): boolean {
         return this.maxX >= other.minX && this.minX <= other.maxX &&
             this.maxY >= other.minY && this.minY <= other.maxY;
     }
 
-    zDistanceTo(brick: Brick): number {
-        return Math.abs(this.maxZ - brick.maxZ);
-    }
-
-    isAtLeastOneAbove(z: number): boolean {
-        return this.minZ > z + 1;
-    }
-
-    intersectZ(z: number) {
+    intersectsZAt(z: number) {
         return this.minZ <= z && this.maxZ >= z;
+    }
+
+    calcSupport() {
+        this.supportedBy = Brick.bricks.filter(brick => brick !== this && brick.intersectsZAt(this.minZ - 1) && brick.overlapsVertically(this));
+        this.supports = Brick.bricks.filter(brick => brick !== this && brick.intersectsZAt(this.maxZ + 1) && brick.overlapsVertically(this));
     }
 }
 
 console.log(`==== ${day}: PART 1 ====`);
-let bricks = lines.map((line) => new Brick(line));
+Brick.bricks = lines.map((line) => new Brick(line));
+
+let movedBrick = true;
+let moveCount = 0;
+while (movedBrick) {
+    console.log(`Bricks falling... ${moveCount++}`);
+    movedBrick = false;
+    for (let brick of Brick.bricks) {
+        while(true) {
+            let bottom = brick.minZ;
+            if (bottom === 1) {
+                break;
+            }
+            let blockingBricks = Brick.bricks.filter(other => other !== brick && other.intersectsZAt(bottom - 1) && other.overlapsVertically(brick));
+            if (blockingBricks.length === 0) {
+                brick.moveDown();
+                movedBrick = true;
+            } else {
+                break;
+            }
+        }
+    }
+}
+console.log("Bricks have settled");
+Brick.bricks.forEach(brick => brick.calcSupport());
+
+let safeToDisintegrate = Brick.bricks.filter(brick => 
+    Brick.bricks.filter(other => 
+        other !== brick && other.supportedBy.length === 1 && other.supportedBy.indexOf(brick) >= 0
+    ).length === 0
+);
+console.log(safeToDisintegrate.length);
