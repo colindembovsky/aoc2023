@@ -54,6 +54,14 @@ export class Direction {
     add(other: Direction) {
         return new Direction(this.row + other.row, this.col + other.col);
     }
+
+    toString() {
+        if (this.equals(Direction.up)) { return "up"; }
+        if (this.equals(Direction.down)) { return "down"; }
+        if (this.equals(Direction.left)) { return "left"; }
+        if (this.equals(Direction.right)) { return "right"; }
+        return `${this.row},${this.col}`;
+    }
     
     reverse() { return new Direction(-this.row, -this.col); }
     turnLeft() { return new Direction(-this.col, this.row); }
