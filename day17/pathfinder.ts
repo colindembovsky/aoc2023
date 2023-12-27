@@ -27,6 +27,10 @@ export class Position {
     move(dir: Direction) {
         return new Position(this.row + dir.row, this.col + dir.col );
     }
+
+    neighbors() {
+        return [this.up(), this.down(), this.left(), this.right()];
+    }
 }
 
 export interface Route {

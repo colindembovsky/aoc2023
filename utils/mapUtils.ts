@@ -53,13 +53,14 @@ export class Direction {
 
     add(other: Direction) {
         return new Direction(this.row + other.row, this.col + other.col);
-    } 
-
+    }
+    
     reverse() { return new Direction(-this.row, -this.col); }
     turnLeft() { return new Direction(-this.col, this.row); }
     turnRight() { return new Direction(this.col, -this.row); }
     turnUp() { return new Direction(-this.row, this.col); }
     turnDown() { return new Direction(this.row, -this.col); }
+    equals(other: Direction) { return this.row === other.row && this.col === other.col; }
 
     static up = new Direction(-1, 0);
     static down = new Direction(1, 0);
@@ -69,6 +70,15 @@ export class Direction {
 
 export class Position {
     constructor(public row: number, public col: number) {}
+    
+    static fromString(pos: string) {
+        let [row, col] = pos.split(',').map(s => parseInt(s));
+        return new Position(row, col);
+    }
+
+    toString() {
+        return `${this.row},${this.col}`;
+    }
 
     clone() { return new Position(this.row, this.col); }
     up() { return new Position(this.row - 1, this.col); }
@@ -76,10 +86,6 @@ export class Position {
     left() { return new Position(this.row, this.col - 1); }
     right() { return new Position(this.row, this.col + 1); }
 
-    toString() {
-        return `(${this.row},${this.col})`;
-    }
-    
     getNeighbors(minRow = 0, maxRow = Number.MAX_SAFE_INTEGER, minCol = 0, maxCol = Number.MAX_SAFE_INTEGER): Position[] {
         let possible = [this.up(), this.down(), this.left(), this.right()];
         return possible.filter(p => p.row >= minRow && p.row < maxRow && p.col >= minCol && p.col < maxCol);
@@ -95,5 +101,18 @@ export class Position {
     
     move(dir: Direction) {
         return new Position(this.row + dir.row, this.col + dir.col );
+    }
+
+    directionFrom(other: Position) {
+        let [row, col] = [this.row - other.row, this.col - other.col];
+        if (row > 1) { row = 1; }
+        if (row < -1) { row = -1; }
+        if (col > 1) { col = 1; }
+        if (col < -1) { col = -1; }
+        return new Direction(row, col);
+    }
+
+    equals(other: Position) {
+        return this.row === other.row && this.col === other.col;
     }
 }
